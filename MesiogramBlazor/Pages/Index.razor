@@ -1,7 +1,28 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject HttpClient Http
 
-<PageTitle>Index</PageTitle>
+@foreach (var message in _messages)
+{
+    <p>@message.Item1:@message.Item2</p><br />
+}
 
-<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
-<MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink></MudAlert>
+@code {
+    private List<Tuple<string, string>> _messages = new List<Tuple<string, string>>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var hubConnection = new HubConnectionBuilder()
+        .WithUrl(""https://localhost:7052/messages").Build();
+
+        hubConnection.On<string, string>(nameof(GetMessage),(GetMessage));
+
+        await hubConnection.StartAsync();
+    }
+
+    private void GetMessage(string username, string message)
+    {
+        _messages.Add(new Tuple<string, string>(username,message));  
+       
+    }
+}
