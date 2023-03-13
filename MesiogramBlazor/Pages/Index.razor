@@ -6,18 +6,24 @@
 {
     <p>@message.Item1:@message.Item2</p><br />
 }
+<MudTextField @bind-Value="Username" Label="Username" Variant="Variant.Outlined"></MudTextField>
+<MudTextField @bind-Value="Message" Label="Message" Variant="Variant.Outlined"></MudTextField>
+<MudButton OnClick="SendMessageToServer">Send message</MudButton>
 
 @code {
+    private string Username{ get; set; }
+    private string Message { get; set; }
     private List<Tuple<string, string>> _messages = new List<Tuple<string, string>>();
+    private HubConnection _hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
-        var hubConnection = new HubConnectionBuilder()
+        _hubConnection = new HubConnectionBuilder()
         .WithUrl("https://localhost:7052/messages").Build();
 
-        hubConnection.On<string, string>(nameof(GetMessage),(GetMessage));
+        _hubConnection.On<string, string>(nameof(GetMessage),(GetMessage));
 
-        await hubConnection.StartAsync();
+        await _hubConnection.StartAsync();
     }
 
     private void GetMessage(string username, string message)
@@ -25,4 +31,12 @@
         _messages.Add(new Tuple<string, string>(username,message));
         StateHasChanged();
     }
+    private async Task SendMessageToServer()
+    {
+        if(_hubConnection?.State == HubConnectionState.Connected)
+        {
+            await _hubConnection.InvokeAsync("SendMessage",Username,Message);
+        }   
+    }
+
 }
