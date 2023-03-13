@@ -24,5 +24,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<MessagesHub>("/messages");
-
 app.Run();

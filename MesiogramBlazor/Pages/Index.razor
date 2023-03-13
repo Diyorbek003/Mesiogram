@@ -13,7 +13,7 @@
     protected override async Task OnInitializedAsync()
     {
         var hubConnection = new HubConnectionBuilder()
-        .WithUrl(""https://localhost:7052/messages").Build();
+        .WithUrl("https://localhost:7052/messages").Build();
 
         hubConnection.On<string, string>(nameof(GetMessage),(GetMessage));
 
@@ -22,7 +22,7 @@
 
     private void GetMessage(string username, string message)
     {
-        _messages.Add(new Tuple<string, string>(username,message));  
-       
+        _messages.Add(new Tuple<string, string>(username,message));
+        StateHasChanged();
     }
 }
